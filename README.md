@@ -76,7 +76,7 @@ This notebook is basically a record of all the things we tried for the KDAG Intr
 
 - **What We Tried:**  
   - Made a custom PyTorch Dataset that returns both image and tabular features.
-  - Built a hybrid model: EfficientNet or ViT for images, MLP for tabular, then concatenate and classify.
+  - Built a hybrid model: ViT for images, MLP for tabular, then concatenate and classify.
 
 - **How It Went:**  
   - Still stuck at ~60% accuracy. Combining both types of data didn’t really help.
@@ -102,3 +102,110 @@ This notebook is basically a record of all the things we tried for the KDAG Intr
 
 - **Result:**  
   Everything in this notebook gave unsatisfactory results—accuracy stuck at ~60%. We’ll need to try some more creative feature engineering or maybe look for better data.
+
+
+# Solution_Model.ipynb – Final Solution and External Model Experiments
+
+## Introduction
+
+This notebook is where we put together our final solution pipeline for the KDAG Intra Hackathon 2025. We also tried out some external models for comparison. After all the trial and error in the previous notebook, here we focused on refining our preprocessing, using more advanced architectures, and seeing how our results stacked up against models made by others.
+
+---
+
+## Data Preparation
+
+- **Data Download:**  
+  We used `gdown` and `wget` to grab both the dataset and some external models (like a Keras `.h5` file) from Google Drive and GitHub.
+
+- **Feature Selection:**  
+  Picked out a set of `meta_features` based on what seemed most promising from earlier experiments and domain knowledge.
+
+- **Image Extraction:**  
+  Extracted images from the HDF5 file and saved them as JPEGs for faster access during training and inference.
+
+---
+
+## Trying Out External Models
+
+- **Loading External Models:**  
+  Downloaded a pre-trained Keras model (`mymodel-2.h5`) and loaded it with TensorFlow/Keras.
+
+- **Compatibility Fixes:**  
+  Had to make sure the right versions of TensorFlow and Keras were installed so the model would actually load.
+
+- **Testing:**  
+  - Resized images to the input size expected by the model.
+  - Ran predictions on both malignant and benign samples.
+  - Calculated metrics like accuracy, sensitivity, specificity, PPV, NPV, and F1-score.
+  - Plotted confusion matrices and ROC curves to visualize performance.
+
+---
+
+## Our Custom PyTorch Solution
+
+### 1. Custom Dataset and Augmentations
+
+- **CancerDataset:**  
+  Built a PyTorch Dataset that returns both image and meta features, handles missing values, and encodes categorical variables.
+
+- **Augmentations:**  
+  Used `albumentations` for strong image augmentations during training, and standard normalization and resizing for validation.
+
+---
+
+### 2. Model Architecture
+
+- **EfficientNet Backbone:**  
+  Used the `geffnet` library for EfficientNet variants. Combined image features with meta features using a small MLP, and added multiple dropout layers for regularization.
+
+- **Custom Swish Activation:**  
+  Implemented a custom Swish activation function for a slight performance boost.
+
+---
+
+### 3. Training Strategy
+
+- **Class Imbalance Handling:**  
+  Used `WeightedRandomSampler` and calculated class weights to make sure the model didn't just learn to predict the majority class.
+
+- **Learning Rate Scheduling:**  
+  Combined cosine annealing with gradual warmup for more stable training.
+
+- **Cross-Validation:**  
+  Used stratified K-fold cross-validation to get a more reliable estimate of model performance.
+
+---
+
+### 4. Evaluation
+
+- **Metrics:**  
+  Calculated accuracy, sensitivity, specificity, PPV, NPV, F1-score, and AUC. Also visualized confusion matrices and ROC curves.
+
+- **Model Saving:**  
+  Saved the best model weights based on validation AUC so we could reload them later.
+
+---
+
+## Key Takeaways
+
+- **External Models:**  
+  Gave us a useful benchmark and showed that this dataset is genuinely tough.
+
+- **Our Solution:**  
+  Combining EfficientNet with meta features, using strong augmentations, and balancing the classes helped us do better than our earlier attempts.
+
+- **Advanced Tricks:**  
+  Using custom learning rate schedules, hybrid architectures, and careful data handling made a noticeable difference.
+
+---
+
+## Conclusion
+
+- We started with basic models and gradually made things more complex, learning from each step.
+- Careful preprocessing, augmentation, and class balancing were just as important as the model architecture itself.
+- Comparing our results with external models helped us set realistic expectations and figure out where to focus our efforts next.
+
+---
+
+**Note:**  
+All the models in `KDAG_Intras.ipynb` gave unsatisfactory results (about 60% accuracy). This notebook (`Solution_Model.ipynb`) documents our improved pipeline and experiments with external models, which gave us better
