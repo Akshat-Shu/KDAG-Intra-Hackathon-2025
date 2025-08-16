@@ -1,195 +1,129 @@
 Skin Lesion Analysis — EDA, Feature Engineering & Clustering
 
-Notebook: Exploratory_Data_Analysis.ipynb
+Notebook: stuffintras.ipynb
+This repository has a ipynb file for skin lesion analysis. The work covers exploratory analysis, dimensionality reduction, clustering, engineered feature design, patient‑level signal extraction.
 
-This notebook walks through a full tabular‑and‑image analysis pipeline for skin lesion data. It covers robust data loading/cleaning, exploratory analysis, dimensionality reduction, multiple clustering strategies, engineered features, patient‑level "ugly duckling" signals, and optional image‑feature fusion from both classical CV and a pretrained CNN.
+1) Data
+Primary table: subject_data.csv
+Contains clinical features (age, sex, site), and the target label (0 = benign, 1 = malignant).
 
-
-1) Data & Setup
-
-Primary table: subject_data.csv (TBP metrics + clinical fields + target where 1 = malignant, 0 = benign).
-
-Optional image data: downloaded via gdown from Google Drive (folder id used in the notebook). Images are matched to the table by isic_id.
-
-Key libraries
-
-pandas, numpy, matplotlib, seaborn
-
-scikit‑learn (StandardScaler, PCA, t‑SNE, SpectralClustering, KMeans, GaussianMixture, metrics)
-
-umap‑learn, hdbscan
-
-TensorFlow / Keras (for DEC autoencoder & ResNet50 features)
-
-OpenCV (cv2), scikit‑image (Gabor + GLCM), PIL
-
-gdown, tqdm, h5py
+Key libraries:
+Data handling: pandas, numpy
+Visualization: matplotlib, seaborn
+ML/Clustering: scikit‑learn, umap-learn
 
 
-Robust CSV loading
+2) Robust CSV Loading
 
-Handles problematic rows (e.g., EOF inside string) by falling back to engine='python', low_memory=False.
-
-
-Light cleaning before analysis
-
-Drops leakage/meta columns when present (e.g., IDs, filenames, prediction outputs from other systems).
-
-Imputes demographics (sex mode, age_approx median).
-
-Consolidates very rare anatom_site_general values into other.
-
-Removes rows with missing target and casts to int.
+Handles problematic rows (e.g., EOF inside string) by using engine='python', low_memory=False.
+Ensures large CSVs (>250 MB) are parsed without truncation.
 
 
-2) Exploratory Data Analysis (EDA)
 
-Univariate
+3) Exploratory Data Analysis (EDA)
 
-Distributions for numerical TBP features (histograms + boxplots).
+Univariate Distributions-
+Histograms & boxplots for numerical TBP features.
+Count plots for categorical fields: sex, anatom_site_general.
 
-Count plots for key categoricals: sex, anatom_site_general.
+Bivariate (Benign vs Malignant)-
+Violin/box/KDE plots for:
+Symmetry (tbp_lv_symm_2axis)
+Border irregularity (tbp_lv_norm_border)
+Color variation (tbp_lv_norm_color)
+Lesion size (clin_size_long_diam_mm)
+Malignancy rate by anatomical site.
+Malignancy rate by age group (0–20, 21–40, 41–60, 61–80, 81+).
 
+Correlations-
+Heatmap of TBP numeric features.
+Highlights strong relationships between area/perimeter ratios, eccentricity, and color metrics.
+Hard vs Easy Malignant Cases
 
-Bivariate (label‑aware)
+Defined using tbp_lv_nevi_confidence:
+Hard Malignant: looks like a nevus but is malignant.
+Easy Malignant: clear malignant patterns.
+Typical Benign: benign control group.
 
-Violin/box/KDE plots comparing benign vs malignant for:
+KDE overlays reveal that hard cases often overlap with benigns in symmetry/size, while easy cases are more distinct.
 
-tbp_lv_symm_2axis (asymmetry proxy), tbp_lv_norm_border (border irregularity),
-
-tbp_lv_norm_color (color variation), clin_size_long_diam_mm (diameter),
-
-plus other TBP color deltas/shape metrics.
-
-
-Malignancy rate by anatomical site (bar chart of % malignant per site).
-
-Malignancy rate by age group (0–20, 21–40, 41–60, 61–80, 81+) — monotonically increasing trend.
-
-
-Correlations
-
-Heatmap of core TBP numerics (area/perimeter ratio, eccentricity, color std, deltaA/B/L, symmetry, etc.).
-
-
-“Hard vs Easy” malignant cases (nevi‑confidence slicing)
-
-Defines Hard Malignant: target=1 & tbp_lv_nevi_confidence > 90 (malignant that looks like a nevus).
-
-Easy Malignant: target=1 & tbp_lv_nevi_confidence < 10.
-
-Typical Benign: random benign sample.
-
-KDE overlays show Hard Malignant tends to have higher color variability, less symmetry, and larger size than Typical Benign, but distributions partially overlap with Easy Malignant — useful for error analysis and thresholding.
 
 
 3) Dimensionality Reduction & Visualization
 
-Standardizes numeric features (StandardScaler).
+Standardizes numeric features.
 
-2‑D embeddings with PCA, t‑SNE, and UMAP.
+Produces 2D embeddings with:
+PCA
+t‑SNE
+UMAP
 
-Two colorings per view:
+Plots embeddings twice:
+Colored by KMeans clusters
+Colored by ground truth (benign vs malignant)
 
-1. by KMeans labels (quick visual clusters),
-
-
-2. by ground‑truth target (benign vs malignant).
-
-
-
-Also plots malignant‑only embeddings to inspect substructure within cancers.
+Also creates malignant‑only embeddings to explore subtypes within cancers.
 
 
-4) Advanced Clustering (memory‑aware)
-
-Preprocess: scale → PCA to ≤30 components for stability.
-
-Methods run side‑by‑side:
-
-Gaussian Mixture (GMM) — components tuned via BIC over n_components = 2..8.
-
-HDBSCAN — density clusters with min_cluster_size=50, min_samples=10 (labels -1 = noise).
-
-Spectral Clustering — n_clusters=5, affinity='nearest_neighbors', n_neighbors=15.
-
-Deep Embedding Clustering (DEC) — shallow autoencoder (32→8→32), trained on PCA space; apply KMeans (k=5) on encoded features.
 
 
-Evaluation
+4) Feature Engineering & Ranking
 
-Prints silhouette scores per method (when valid).
-
-Writes full assignments to clustering_results_full.csv.
-
-
-5) Feature Engineering & Ranking
-
-Engineered signals (highlights)
+Selected Features-
 
 log_lesion_area = log(tbp_lv_areaMM2 + 1)
-
 normalized_lesion_size = clin_size_long_diam_mm / (age_approx + 1e-3)
+perimeter_to_area_ratio = tbp_lv_perimeterMM / tbp_lv_areaMM2
+area_to_perimeter_ratio = tbp_lv_areaMM2 / tbp_lv_perimeterMM
+lesion_severity_index = mean(border, color, eccentricity)
+size_age_interaction = size * age
+shape_color_consistency = eccentricity * color_std
+index_age_size_symmetry = age * area * symmetry
+lesion_visibility_score = deltaLBnorm + norm_color
+color_asymmetry_index = symmetry * radial_color_std
+color_variance_ratio = color_std / stdLExt
+hue_color_std_interaction = hue * color_std
+hue_contrast = |H − Hext|
+color_contrast_index = deltaA + deltaB + deltaL + deltaLBnorm
+lesion_shape_index = area / perimeter²
 
-perimeter_to_area_ratio = tbp_lv_perimeterMM / (tbp_lv_areaMM2 + 1e-3)
+Ranking Approach-
+Mutual Information
+Single‑feature ROC‑AUC
+Pearson correlation
 
-area_to_perimeter_ratio = tbp_lv_areaMM2 / (tbp_lv_perimeterMM + 1e-3)
-
-lesion_severity_index = (tbp_lv_norm_border + tbp_lv_norm_color + tbp_lv_eccentricity) / 3
-
-size_age_interaction = clin_size_long_diam_mm * age_approx
-
-shape_color_consistency = tbp_lv_eccentricity * tbp_lv_color_std_mean
-
-index_age_size_symmetry = age_approx * tbp_lv_areaMM2 * tbp_lv_symm_2axis
-
-lesion_visibility_score = tbp_lv_deltaLBnorm + tbp_lv_norm_color
-
-color_asymmetry_index = tbp_lv_symm_2axis * tbp_lv_radial_color_std_max
-
-color_variance_ratio = tbp_lv_color_std_mean / (tbp_lv_stdLExt + 1e-3)
-
-hue_color_std_interaction = tbp_lv_H * tbp_lv_color_std_mean
-
-hue_contrast = |tbp_lv_H - tbp_lv_Hext|
-
-color_contrast_index = tbp_lv_deltaA + tbp_lv_deltaB + tbp_lv_deltaL + tbp_lv_deltaLBnorm
-
-lesion_shape_index = tbp_lv_areaMM2 / (tbp_lv_perimeterMM^2 + 1e-3)
+Plots:
+Violin plots (feature vs target)
+Correlation heatmap of engineered features
 
 
-Ranking
 
-Computes mutual information, single‑feature ROC‑AUC, and Pearson r vs target to score features.
+5) Patient‑Level “Ugly Duckling” Signals
 
-Plots: violins (per feature vs target), and a correlation heatmap of the engineered set.
-
-
-6) Patient‑Level “Ugly Duckling” Signals
-
-For each patient_id, aggregates dispersion of moles: std of color, border, and diameter proxies; and variance of clin_size_long_diam_mm.
+Aggregates features per patient_id.
+Measures cross‑mole variability in:
+Color
+Border
+Diameter
 
 Flags has_malignant per patient.
 
-Compares distributions (strip + box plots; diameter variance on log‑scale).
-
-Finding: Patients who have any malignant lesion tend to show higher cross‑mole variability in color/border/diameter — a patient‑level risk cue.
+Finding: Patients with at least one malignant lesion show higher variability across moles — a potential patient‑level risk indicator.
 
 
-7) How to Reproduce (quick start)
 
-# recommended environment
-python -m pip install \
-  pandas numpy matplotlib seaborn scikit-learn umap-learn hdbscan \
-  tensorflow opencv-python scikit-image pillow gdown tqdm h5py
+6) How to Reproduce
 
-# run the notebook
-jupyter lab  # or jupyter notebook
+Install requirements-
+pip install pandas numpy matplotlib seaborn scikit-learn umap-learn 
 
+Can run the notebook on colab/jupyter enviornment.
 
-8) Notes
-Some steps are compute‑intensive (t‑SNE/UMAP, Spectral, DEC, ResNet50). They will run on CPU but may take longer.
+7) Notes
+t‑SNE, UMAP, Spectral, and DEC are compute‑intensive. They run on CPU but may be slow.
 
-If CSV parsing errors occur, use: pd.read_csv('subject_data.csv', engine='python', low_memory=False).
+For large CSVs with parse errors, use:
+pd.read_csv('subject_data.csv', engine='python', low_memory=False)
 
-For clustering on large data, the notebook reduces dimensionality first (PCA) to keep memory in check.
+PCA preprocessing is used to keep clustering memory‑efficient.
+
