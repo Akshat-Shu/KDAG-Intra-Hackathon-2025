@@ -1,6 +1,6 @@
 Skin Lesion Analysis — EDA, Feature Engineering & Clustering
 
-Notebook: stuffintras.ipynb
+Notebook: Exploratory_Data_Analysis.ipynb
 
 This notebook walks through a full tabular‑and‑image analysis pipeline for skin lesion data. It covers robust data loading/cleaning, exploratory analysis, dimensionality reduction, multiple clustering strategies, engineered features, patient‑level "ugly duckling" signals, and optional image‑feature fusion from both classical CV and a pretrained CNN.
 
