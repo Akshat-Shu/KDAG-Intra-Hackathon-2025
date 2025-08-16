@@ -209,3 +209,23 @@ This notebook is where we put together our final solution pipeline for the KDAG 
 
 **Note:**  
 All the models in `KDAG_Intras.ipynb` gave unsatisfactory results (about 60% accuracy). This notebook (`Solution_Model.ipynb`) documents our improved pipeline and experiments with external models, which gave us better results.
+
+
+
+# Solution_Model_Modified.ipynb – Adds another branch to the existing solution model
+
+## Introduction
+
+Deeper analysis of the images shows that, the malignant cases are further subdivided into 3 classes, namely basel cell carcinoma, melanoma, squamous cell carcinoma, now we can use this classification to further imporove the model by extracting features from each subclass, doing this leads to tighter boundries around the malignant cases, hence improving the accuracy of the benign cases.
+
+## Model Architecture
+
+In the above model, we use a shared EfficientNet backbone to extract image features. From these features, we add another branch to predict the 3 malignant subtypes, while the main branch combines the image features, the subtype-projected features, and the tabular metadata. Finally, this concatenated representation is used to predict whether the case is benign or malignant.
+
+## Result
+
+This model reduces the number of false positives, which means fewer patients are unnecessarily alarmed, but the trade-off is that it increases the number of false negatives, which is quite fatal for this type of cancer predictor.
+
+## Conclusion
+
+We could use both the solution model, as the first one predicts the malignant cases more accurately, while the second one predicts the benign cases more accurately.
