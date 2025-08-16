@@ -208,4 +208,4 @@ This notebook is where we put together our final solution pipeline for the KDAG 
 
 
 **Note:**  
-All the models in `KDAG_Intras.ipynb` gave unsatisfactory results (about 60% accuracy). This notebook (`Solution_Model.ipynb`) documents our improved pipeline and experiments with external models, which gave us better
+All the models in `KDAG_Intras.ipynb` gave unsatisfactory results (about 60% accuracy). This notebook (`Solution_Model.ipynb`) documents our improved pipeline and experiments with external models, which gave us better results.
