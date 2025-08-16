@@ -4,7 +4,7 @@
 
 This notebook is basically a record of all the things we tried for the KDAG Intra Hackathon 2025. We experimented with a bunch of different approaches—tabular models, image models, and even hybrid models that use both. Unfortunately, nothing here really worked out: all the models topped out at about 60% accuracy, which is not what we were hoping for.
 
----
+
 
 ## Data Loading and Exploration
 
@@ -26,7 +26,7 @@ This notebook is basically a record of all the things we tried for the KDAG Intr
   - Filled missing ages with the median.
   - Filled missing sex with `'unknown'`.
 
----
+
 
 ## Image Handling
 
@@ -36,7 +36,7 @@ This notebook is basically a record of all the things we tried for the KDAG Intr
 - **Visual Checks:**  
   Plotted random images and some specific cases (like all malignant ones) just to see what the data looked like and if there were any obvious issues.
 
----
+
 
 ## Tabular Data Preprocessing
 
@@ -46,7 +46,7 @@ This notebook is basically a record of all the things we tried for the KDAG Intr
 - **Label Encoding:**  
   Used pandas' `factorize` to turn diagnosis strings into numbers for the ML models.
 
----
+
 
 ## Modeling Attempts
 
@@ -59,7 +59,7 @@ This notebook is basically a record of all the things we tried for the KDAG Intr
 - **How It Went:**  
   - Accuracy hovered around 60%. The tabular data alone just didn’t have enough signal.
 
----
+
 
 ### 2. Image-Only Models
 
@@ -70,7 +70,7 @@ This notebook is basically a record of all the things we tried for the KDAG Intr
 - **How It Went:**  
   - Even with class balancing and all, these models also capped out at about 60% accuracy.
 
----
+
 
 ### 3. Hybrid (Tabular + Image) Models
 
@@ -81,7 +81,7 @@ This notebook is basically a record of all the things we tried for the KDAG Intr
 - **How It Went:**  
   - Still stuck at ~60% accuracy. Combining both types of data didn’t really help.
 
----
+
 
 ## Model Evaluation
 
@@ -91,7 +91,7 @@ This notebook is basically a record of all the things we tried for the KDAG Intr
 - **Findings:**  
   No matter what we tried, nothing broke past the 60% barrier. Either the features just aren’t strong enough, or we need to rethink our approach.
 
----
+
 
 ## Summary
 
@@ -110,7 +110,7 @@ This notebook is basically a record of all the things we tried for the KDAG Intr
 
 This notebook is where we put together our final solution pipeline for the KDAG Intra Hackathon 2025. We also tried out some external models for comparison. After all the trial and error in the previous notebook, here we focused on refining our preprocessing, using more advanced architectures, and seeing how our results stacked up against models made by others.
 
----
+
 
 ## Data Preparation
 
@@ -123,7 +123,7 @@ This notebook is where we put together our final solution pipeline for the KDAG 
 - **Image Extraction:**  
   Extracted images from the HDF5 file and saved them as JPEGs for faster access during training and inference.
 
----
+
 
 ## Trying Out External Models
 
@@ -139,7 +139,7 @@ This notebook is where we put together our final solution pipeline for the KDAG 
   - Calculated metrics like accuracy, sensitivity, specificity, PPV, NPV, and F1-score.
   - Plotted confusion matrices and ROC curves to visualize performance.
 
----
+
 
 ## Our Custom PyTorch Solution
 
@@ -151,7 +151,7 @@ This notebook is where we put together our final solution pipeline for the KDAG 
 - **Augmentations:**  
   Used `albumentations` for strong image augmentations during training, and standard normalization and resizing for validation.
 
----
+
 
 ### 2. Model Architecture
 
@@ -161,7 +161,7 @@ This notebook is where we put together our final solution pipeline for the KDAG 
 - **Custom Swish Activation:**  
   Implemented a custom Swish activation function for a slight performance boost.
 
----
+
 
 ### 3. Training Strategy
 
@@ -174,7 +174,7 @@ This notebook is where we put together our final solution pipeline for the KDAG 
 - **Cross-Validation:**  
   Used stratified K-fold cross-validation to get a more reliable estimate of model performance.
 
----
+
 
 ### 4. Evaluation
 
@@ -184,7 +184,7 @@ This notebook is where we put together our final solution pipeline for the KDAG 
 - **Model Saving:**  
   Saved the best model weights based on validation AUC so we could reload them later.
 
----
+
 
 ## Key Takeaways
 
@@ -197,7 +197,7 @@ This notebook is where we put together our final solution pipeline for the KDAG 
 - **Advanced Tricks:**  
   Using custom learning rate schedules, hybrid architectures, and careful data handling made a noticeable difference.
 
----
+
 
 ## Conclusion
 
@@ -205,7 +205,7 @@ This notebook is where we put together our final solution pipeline for the KDAG 
 - Careful preprocessing, augmentation, and class balancing were just as important as the model architecture itself.
 - Comparing our results with external models helped us set realistic expectations and figure out where to focus our efforts next.
 
----
+
 
 **Note:**  
 All the models in `KDAG_Intras.ipynb` gave unsatisfactory results (about 60% accuracy). This notebook (`Solution_Model.ipynb`) documents our improved pipeline and experiments with external models, which gave us better
