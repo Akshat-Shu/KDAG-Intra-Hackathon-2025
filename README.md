@@ -222,6 +222,9 @@ Deeper analysis of the images shows that, the malignant cases are further subdiv
 
 In the above model, we use a shared EfficientNet backbone to extract image features. From these features, we add another branch to predict the 3 malignant subtypes, while the main branch combines the image features, the subtype-projected features, and the tabular metadata. Finally, this concatenated representation is used to predict whether the case is benign or malignant.
 
+## Kaggle pretrained model links
+- [Kaggle Notebook](https://www.kaggle.com/code/joshuarajtadi/solution-model-modified)
+- [GDrive link for model weights](https://drive.google.com/file/d/1-GaHMgmFkQvbVkt1iKmvzUhABeStglUw/view?usp=sharing)
 ## Result
 
 This model reduces the number of false positives, which means fewer patients are unnecessarily alarmed, but the trade-off is that it increases the number of false negatives, which is quite fatal for this type of cancer predictor.
